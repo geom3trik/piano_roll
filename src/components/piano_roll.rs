@@ -13,11 +13,7 @@ pub struct NoteData {
 
 impl NoteData {
     pub fn new(pitch: Pitch, start: MusicalTime, end: MusicalTime) -> Self {
-        Self {
-            pitch,
-            start,
-            end,
-        }
+        Self { pitch, start, end }
     }
 }
 
@@ -27,8 +23,7 @@ pub struct Pitch(u8);
 const NOTE_MASK: u8 = 0b11110000;
 const OCTAVE_MASK: u8 = 0b00001111;
 
-// 0 - sharp
-// 1-3 - note
+// 0-3 - note
 // 4-7 - octave
 
 impl Pitch {
@@ -217,7 +212,6 @@ pub enum PianoRollEvent {
 #[derive(Lens)]
 pub struct PianoRoll {
     notes: Vec<NoteData>,
-
 }
 
 impl PianoRoll {
@@ -230,109 +224,48 @@ impl PianoRoll {
             )],
         }
         .build(cx, |cx| {
-            // // Context toolbar
-            // HStack::new(cx, |cx| {
-            //     Label::new(cx, "Context toolbar");
-            // })
-            // .class("context-toolbar")
-            // .z_index(15)
-            // .child_space(Stretch(1.0))
-            // .background_color(Color::rgb(40, 40, 40))
-            // .height(Pixels(40.0));
+            ScrollView::new(cx, 0.0, 0.0, false, false, |cx| {
+                // ZStack::new(cx, |cx|{
+                // Grid + Notes
+                GridView::new(cx, |cx| {
+                    //Binding::new(cx, PianoRoll::notes, |cx, notes|{
+                    for (idx, note) in PianoRoll::notes.get(cx).iter().enumerate() {
+                        let note = note.clone();
+                        Binding::new(cx, GridView::root, move |cx, grid| {
+                            let grid = grid.get(cx);
+                            if time_to_pos(note.start, note.end, grid.start, grid.end).is_some() {
+                                NoteView::new(cx, idx).bind(
+                                    PianoRoll::notes.index(idx),
+                                    move |handle, note| {
+                                        let note_data = note.get(&handle);
+                                        let (posx, width) = time_to_pos(
+                                            note_data.start,
+                                            note_data.end,
+                                            grid.start,
+                                            grid.end,
+                                        )
+                                        .unwrap();
+                                        let (posy, height) = pitch_to_pos(note_data.pitch);
 
-            // HStack::new(cx, |cx| {
-                // // Toolbar
-                // VStack::new(cx, |cx| {
-                //     Button::new(
-                //         cx,
-                //         |cx| {},
-                //         |cx| Icon::new(cx, ICON_POINTER),
-                //     )
-                //     .class("ghost")
-                //     .class("group")
-                //     .checked(true);
+                                        handle
+                                            .left(Pixels(60.0 + posx))
+                                            .top(Pixels(posy))
+                                            .height(Pixels(height))
+                                            .width(Pixels(width));
+                                    },
+                                );
+                            }
+                        });
+                    }
+                })
+                .height(Pixels(1230.0));
 
-                //     Button::new(
-                //         cx,
-                //         |cx| {},
-                //         |cx| Icon::new(cx, ICON_PENCIL),
-                //     )
-                //     .class("ghost")
-                //     .class("group");
-
-                //     Button::new(
-                //         cx,
-                //         |cx| {},
-                //         |cx| Icon::new(cx, ICON_SLICE),
-                //     )
-                //     .class("ghost")
-                //     .class("group");
-
-                //     Button::new(
-                //         cx,
-                //         |cx| {},
-                //         |cx| Icon::new(cx, ICON_SEARCH),
-                //     )
-                //     .class("ghost")
-                //     .class("group");
-                // })
-                // .class("toolbar")
-                // .background_color(Color::rgb(40, 40, 40))
-                // .z_index(10);
-
-                ScrollView::new(cx, 0.0, 0.0, false, false, |cx| {
-                    // ZStack::new(cx, |cx|{
-                    // Grid + Notes
-                    GridView::new(cx, |cx| {
-                        //Binding::new(cx, PianoRoll::notes, |cx, notes|{
-                        for (idx, note) in PianoRoll::notes.get(cx).iter().enumerate() {
-                            let note = note.clone();
-                            Binding::new(cx, GridView::root, move |cx, grid|{
-                                let grid = grid.get(cx);
-                                if time_to_pos(
-                                    note.start,
-                                    note.end,
-                                    grid.start,
-                                    grid.end,
-                                ).is_some() {
-                                    NoteView::new(cx, idx).bind(
-                                        PianoRoll::notes.index(idx),
-                                        move |handle, note| {
-                                            let note_data = note.get(&handle);
-                                            let (posx, width) = time_to_pos(
-                                                note_data.start,
-                                                note_data.end,
-                                                grid.start,
-                                                grid.end,
-                                            )
-                                            .unwrap();
-                                            let (posy, height) = pitch_to_pos(note_data.pitch);
-                        
-                                                handle
-                                                .left(Pixels(60.0 + posx))
-                                                .top(Pixels(posy))
-                                                .height(Pixels(height))
-                                                .width(Pixels(width));
-                                        },
-                                    );
-                                }
-                            });
-                        }
-
-                        //});
-                    })
-                    .height(Pixels(1230.0));
-
-                    // Piano
-                    PianoView::new(cx)
-                        .height(Pixels(1230.0))
-                        .width(Pixels(60.0))
-                        .position_type(PositionType::SelfDirected);
-
-                    // }).height(Auto);
-                });
-            // })
-            // .col_between(Pixels(1.0));
+                // Piano
+                PianoView::new(cx)
+                    .height(Pixels(1230.0))
+                    .width(Pixels(60.0))
+                    .position_type(PositionType::SelfDirected);
+            });
         })
         .row_between(Pixels(1.0))
     }
@@ -382,13 +315,9 @@ impl View for PianoView {
 
         let radius = 4.0 * scale;
 
-        let white_key_fill = vg::Paint::color(
-            vg::Color::hex("#C8C8C8"),
-        );
+        let white_key_fill = vg::Paint::color(vg::Color::hex("#C8C8C8"));
 
-        let mut white_key_stroke = vg::Paint::color(
-            vg::Color::hex("#000000"),
-        );
+        let mut white_key_stroke = vg::Paint::color(vg::Color::hex("#000000"));
 
         white_key_stroke.set_line_width(0.5 * scale);
 
@@ -458,9 +387,7 @@ impl View for PianoView {
             0.0,
         );
 
-        let black_key_fill = vg::Paint::color(
-            vg::Color::hex("#070707")
-        );
+        let black_key_fill = vg::Paint::color(vg::Color::hex("#070707"));
 
         // Draw black keys
         for i in 0..5 {
@@ -485,7 +412,6 @@ impl View for PianoView {
         }
     }
 }
-
 
 #[derive(Debug, Clone, Copy)]
 pub enum GridSpacing {
@@ -524,7 +450,6 @@ impl GridView {
 }
 
 impl View for GridView {
-
     fn element(&self) -> Option<&'static str> {
         Some("gridview")
     }
@@ -534,30 +459,41 @@ impl View for GridView {
             WindowEvent::MouseScroll(x, y) => {
                 if cx.modifiers().contains(Modifiers::CTRL) {
                     if *y < 0.0 {
-                        self.end = self.end.checked_sub(MusicalTime::from_128th_beats(0, 1) * (y.abs() * 10.0) as u32).unwrap_or_default();
+                        self.end = self
+                            .end
+                            .checked_sub(
+                                MusicalTime::from_128th_beats(0, 1) * (y.abs() * 10.0) as u32,
+                            )
+                            .unwrap_or_default();
                     } else if *y > 0.0 {
                         self.end += MusicalTime::from_128th_beats(0, 1) * (y.abs() * 10.0) as u32;
                     }
 
-                    // Consume the event to stop the scrollview 
+                    // Consume the event to stop the scrollview
                     meta.consume();
                 } else {
                     if *x > 0.0 {
-                        if let Some(new_start) = self.start.checked_sub(MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32) {
+                        if let Some(new_start) = self.start.checked_sub(
+                            MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32,
+                        ) {
                             self.start = new_start;
-                            self.end = self.end.checked_sub(MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32).unwrap();
+                            self.end = self
+                                .end
+                                .checked_sub(
+                                    MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32,
+                                )
+                                .unwrap();
                         }
-                        
                     } else if *x < 0.0 {
                         self.start += MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32;
-                        self.end += MusicalTime::from_128th_beats(0, 1)  * (x.abs() * 10.0) as u32;
+                        self.end += MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32;
                     }
                 }
 
                 cx.needs_redraw();
             }
 
-            _=> {}
+            _ => {}
         });
     }
 
@@ -626,13 +562,14 @@ impl View for GridView {
         let end = self.end.as_beats_f64();
         let duration = self.end.checked_sub(self.start).unwrap();
         let num = duration.as_beats_f64() as f32;
-      
+
         let px_per_beat = (bounds.w - (60.0 * scale)) / (num * scale);
 
         // let px_per_beat = 100.0;
-        let mut lane_x = cx.logical_to_physical(60.0 - self.start.as_beats_f64().fract() as f32 * px_per_beat);
+        let mut lane_x =
+            cx.logical_to_physical(60.0 - self.start.as_beats_f64().fract() as f32 * px_per_beat);
 
-        for index in 0..num as u32 +1 {
+        for index in 0..num as u32 + 1 {
             let mut path = vg::Path::new();
             path.move_to(bounds.x + lane_x, bounds.y);
             path.line_to(bounds.x + lane_x, bounds.bottom());
@@ -696,10 +633,10 @@ impl View for NoteView {
                     // }
                     if dy >= 13.0 * 1.5 {
                         cx.emit(PianoRollEvent::MoveDown(self.index));
-                        self.down_pos = *y -13.0 * 1.5;
+                        self.down_pos = *y;
                     } else if dy <= -13.0 * 1.5 {
                         cx.emit(PianoRollEvent::MoveUp(self.index));
-                        self.down_pos = *y - 13.0 * 1.5;
+                        self.down_pos = *y;
                     }
                 }
             }
@@ -752,7 +689,7 @@ fn time_to_pos(
 
     let px_per_beat = 100.0;
 
-    let offset_from_start = (start.as_beats_f64() -  grid_start.as_beats_f64()) * px_per_beat;
+    let offset_from_start = (start.as_beats_f64() - grid_start.as_beats_f64()) * px_per_beat;
     let length = (end.as_beats_f64() - start.as_beats_f64()) * px_per_beat;
 
     Some((offset_from_start as f32, length as f32))

@@ -11,12 +11,13 @@ pub enum ToggleButtonEvent {
 
 impl ToggleButton {
     pub fn new<'a>(cx: &'a mut Context, icon: &str) -> Handle<'a, Self> {
-        Self{checked: false}.build(cx, |cx|{
-            Icon::new(cx, icon).hoverable(false);
-        })
-        .size(Auto)
-        .checked(ToggleButton::checked)
-        .on_press(|cx| cx.emit(ToggleButtonEvent::Toggle))
+        Self { checked: false }
+            .build(cx, |cx| {
+                Icon::new(cx, icon).hoverable(false);
+            })
+            .size(Auto)
+            .checked(ToggleButton::checked)
+            .on_press(|cx| cx.emit(ToggleButtonEvent::Toggle))
     }
 }
 

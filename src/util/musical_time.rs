@@ -719,7 +719,6 @@ impl Sub<MusicalTime> for MusicalTime {
     }
 }
 
-
 impl Mul<u32> for MusicalTime {
     type Output = Self;
     fn mul(self, rhs: u32) -> Self::Output {

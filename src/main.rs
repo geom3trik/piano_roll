@@ -1,4 +1,4 @@
-use vizia::{image::Pixel, prelude::*};
+use vizia::prelude::*;
 
 pub mod util;
 pub use util::*;

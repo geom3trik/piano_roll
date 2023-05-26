@@ -1,3 +1,6 @@
+* {
+    font-size: 11;
+}
 
 :root {
     background-color: #000000;
@@ -30,7 +33,8 @@ toggle_button:checked icon {
     color: #000000;
 }
 
-header, footer {
+header,
+footer {
     layout-type: row;
     height: 50px;
     child-space: 1s;
@@ -65,7 +69,7 @@ piano-roll .toolbar {
     width: auto;
     child-space: 4px;
     row-between: 4px;
-    font-size: 20.0;
+    font-size: 20;
 }
 
 piano-roll .toolbar button {
@@ -81,6 +85,71 @@ noteview {
     background-color: rgb(212, 77, 49);
 }
 
+/* GridView */
+
+gridview {
+    height: 1312px;
+}
+
+/* PianoView */
+
+pianoview {
+    left: -1px;
+    width: 70px;
+    height: 1312px;
+    position-type: self-directed;
+}
+
+.pianoview-octave {
+    height: 164px;
+}
+
+.pianoview-black-keys {
+    top: 13px;
+    row-between: 13px;
+}
+
+.pianoview-white-keys {
+}
+
+/* PianoTile */
+
+pianotile {
+    width: 1s;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+
+    background-color: #b8b8b8;
+
+    child-left: 1s;
+    child-right: 4px;
+    child-top: 1s;
+    child-bottom: 2px;
+
+    border-width: 1px;
+    border-color: #121212;
+}
+
+pianotile label {
+    color: #000;
+}
+
+pianotile.black-key {
+    right: 1s;
+    background-color: #121212;
+}
+
+pianotile.black-key.space-14 {
+    top: 14px;
+}
+
+pianotile.black-key.space-27 {
+    top: 27px;
+}
+
+pianotile.black-key label {
+    color: #fff;
+}
 /* .transport button {
     background-color: transparent;
     border-width: 0px;

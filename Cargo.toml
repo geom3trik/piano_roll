@@ -5,4 +5,4 @@ edition = "2021"
 
 [dependencies]
 # vizia = {path = "../vizia"}
-vizia = {git = "https://github.com/vizia/vizia", branch = "new-style-system"}
+vizia = {git = "https://github.com/vizia/vizia"}

@@ -10,8 +10,8 @@ impl TopBar {
             .build(cx, |cx| {
                 // Adjustments
                 // Space
-                ToggleButton::new(cx, "\u{eae3}");
-                ToggleButton::new(cx, "\u{eb20}");
+                // ToggleButton::new(cx, "\u{eae3}");
+                // ToggleButton::new(cx, "\u{eb20}");
             })
             .layout_type(LayoutType::Row)
     }

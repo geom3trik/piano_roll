@@ -1,6 +1,6 @@
 use vizia::prelude::*;
 
-use crate::PianoRollEvent;
+use crate::{NoteData, PianoRollEvent};
 
 pub struct NoteView {
     index: usize,
@@ -9,7 +9,11 @@ pub struct NoteView {
 }
 
 impl NoteView {
-    pub fn new(cx: &mut Context, index: usize) -> Handle<Self> {
+    pub fn new<L: Lens<Target = NoteData>>(
+        cx: &mut Context,
+        index: usize,
+        lens: L,
+    ) -> Handle<Self> {
         Self {
             index,
             is_dragging: false,

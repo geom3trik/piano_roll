@@ -6,9 +6,9 @@ pub const MIN_OCTAVE: i8 = -2;
 
 #[derive(Debug, Lens, Clone, Data)]
 pub struct NoteData {
-    pitch: Pitch,
-    start: MusicalTime,
-    end: MusicalTime,
+    pub pitch: Pitch,
+    pub start: MusicalTime,
+    pub end: MusicalTime,
 }
 
 impl NoteData {
@@ -91,6 +91,10 @@ impl Note {
             Note::CS | Note::DS | Note::FS | Note::GS | Note::AS => true,
             _ => false,
         }
+    }
+
+    pub fn is_white_key(&self) -> bool {
+        !self.is_black_key()
     }
 
     pub fn next(&self) -> Self {

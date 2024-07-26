@@ -105,7 +105,7 @@ impl MusicalTime {
     }
 
     /// * `beats` - The time in musical beats.
-    /// * `eigth_beats` - The number of eigth-beats (after the time `beats`). This will be
+    /// * `eighth_beats` - The number of eigth-beats (after the time `beats`). This will be
     /// constrained to the range `[0, 7]`.
     pub fn from_eighth_beats(beats: u32, eigth_beats: u32) -> Self {
         Self::from_fractional_beats::<8>(beats, eigth_beats)

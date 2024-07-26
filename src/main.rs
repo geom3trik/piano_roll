@@ -1,5 +1,8 @@
 use vizia::prelude::*;
 
+pub mod data;
+pub use data::*;
+
 pub mod util;
 pub use util::*;
 
@@ -14,20 +17,30 @@ pub struct AppData {
     pub clip_end: MusicalTime,
 }
 
-fn main() {
+fn main() -> Result<(), ApplicationError> {
     Application::new(|cx| {
         cx.add_stylesheet(include_style!("src/theme.css"))
             .expect("Failed to load stylesheet");
+
+        PianoRollData {
+            key_labels: KeyLabels::Black,
+
+            grid: Grid::F16,
+            clip_duration: MusicalTime::from_beats(4),
+            view_start: MusicalTime::from_beats(0),
+            view_end: MusicalTime::from_beats(4),
+        }
+        .build(cx);
+
         TopBar::new(cx);
-        ZStack::new(cx, |cx| {
-            Element::new(cx).background_color(Color::from("#323232"));
-            PianoRoll::new(cx).space(Pixels(4.0));
-            Element::new(cx)
-                .border_width(Pixels(4.0))
-                .border_color(Color::from("#323232"))
-                .border_radius(Pixels(8.0))
-                .hoverable(false);
+        HStack::new(cx, |cx| {
+            //Element::new(cx).background_color(Color::from("#323232"));
+
+            PianoRoll::new(cx);
+
+            // Properties
+            VStack::new(cx, |cx| {}).width(Pixels(200.0));
         });
     })
-    .run();
+    .run()
 }

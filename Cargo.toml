@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# vizia = {path = "../vizia"}
-vizia = {git = "https://github.com/vizia/vizia"}
+vizia = {path = "../vizia"}
+# vizia = {git = "https://github.com/vizia/vizia", branch = "skia"}

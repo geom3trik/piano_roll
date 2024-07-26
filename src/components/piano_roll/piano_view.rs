@@ -1,6 +1,6 @@
 use vizia::prelude::*;
 
-use crate::{Note, Pitch, MAX_OCTAVE, MIN_OCTAVE};
+use crate::{Note, PianoRollData, Pitch, MAX_OCTAVE, MIN_OCTAVE};
 pub struct PianoView<SL>
 where
     SL: Lens<Target = f32>,
@@ -28,6 +28,7 @@ where
                         PianoTile::new(cx, scale_lens.clone(), Pitch::new(oct, Note::D, 0.0));
                         PianoTile::new(cx, scale_lens.clone(), Pitch::new(oct, Note::C, 0.0));
                     })
+                    .pointer_events(PointerEvents::None)
                     .class("pianoview-white-keys");
 
                     VStack::new(cx, |cx| {
@@ -44,12 +45,13 @@ where
                             .class("black-key")
                             .class("space-14");
                     })
+                    .pointer_events(PointerEvents::None)
                     .class("pianoview-black-keys");
                 })
                 .class("pianoview-octave");
             }
         })
-        .hoverable(false)
+        .hoverable(true)
     }
 }
 
@@ -81,12 +83,18 @@ where
             pitch,
         }
         .build(cx, |cx| {
-            if pitch.note() == Note::C {
-                Label::new(cx, &format!("C{}", pitch.octave()));
-            }
+            let visible = PianoRollData::key_labels.map(move |key_labels| match key_labels {
+                crate::KeyLabels::None => false,
+                crate::KeyLabels::All => true,
+                crate::KeyLabels::Root => pitch.note() == Note::C,
+                crate::KeyLabels::White => pitch.note().is_white_key(),
+                crate::KeyLabels::Black => pitch.note().is_black_key(),
+            });
+
+            Label::new(cx, &format!("{}{}", pitch.note(), pitch.octave())).visibility(visible);
         })
-        .hoverable(true)
-        .height(Pixels(note_to_key_height(pitch.note())))
+        .pointer_events(PointerEvents::Auto)
+        .height(scale_lens.map(move |scale| Pixels(note_to_key_height(pitch.note()) * *scale)))
     }
 }
 
@@ -97,6 +105,8 @@ where
     fn element(&self) -> Option<&'static str> {
         Some("pianotile")
     }
+
+    fn event(&mut self, cx: &mut EventContext, event: &mut Event) {}
 }
 
 pub fn note_to_key_height(note: Note) -> f32 {

@@ -2,47 +2,42 @@ use vizia::icons::{ICON_PENCIL, ICON_SEARCH, ICON_SLICE};
 use vizia::vg;
 use vizia::{icons::ICON_POINTER, prelude::*};
 
-use crate::MusicalTime;
-
-pub struct GridData {
-    start: MusicalTime,
-    end: MusicalTime,
-    pixels_per_beat: f32,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum GridSpacing {
-    Bars,
-    Beats,
-    Three,
-    Four,
-    Six,
-    Eight,
-    Sixteen,
-    ThirtyTwo,
-    SixtyFour,
-}
+use crate::{MusicalTime, PianoRollData};
 
 #[derive(Lens, Data, Clone)]
 pub struct GridView {
     // TODO: Move this up
-    pub start: MusicalTime,
-    pub end: MusicalTime,
-    pub clip_start: MusicalTime,
-    pub clip_end: MusicalTime,
+    // pub start: MusicalTime,
+    // pub end: MusicalTime,
+    // pub clip_start: MusicalTime,
+    // pub clip_end: MusicalTime,
 }
 
 impl GridView {
     pub fn new(cx: &mut Context, content: impl Fn(&mut Context)) -> Handle<Self> {
         Self {
-            start: MusicalTime::from_beats(0),
-            end: MusicalTime::from_beats(9),
-            clip_start: MusicalTime::from_beats(0),
-            clip_end: MusicalTime::from_beats(20),
+            // start: MusicalTime::from_beats(0),
+            // end: MusicalTime::from_beats(9),
+            // clip_start: MusicalTime::from_beats(0),
+            // clip_end: MusicalTime::from_beats(20),
         }
         .build(cx, |cx| {
             (content)(cx);
         })
+        // .bind(Self::start, |handle, start|{
+        //     handle.bind(Self::end, move |handle, end|{
+        //         let s = start.get(&handle).as_beats_f64();
+        //         let e = end.get(&handle).as_beats_f64();
+        //         let duration = end.get(&handle).checked_sub(start.get(&handle)).unwrap();
+        //         let num = duration.as_beats_f64() as f32;
+
+        //         let scale = 1.0;
+
+        //         let width = (100.0 * (num * scale) ) + (70.0 * scale);
+
+        //         handle.width(Pixels(width));
+        //     });
+        // })
     }
 }
 
@@ -51,50 +46,50 @@ impl View for GridView {
         Some("gridview")
     }
 
-    fn event(&mut self, cx: &mut EventContext, event: &mut Event) {
-        event.map(|window_event, meta| match window_event {
-            WindowEvent::MouseScroll(x, y) => {
-                if cx.modifiers().contains(Modifiers::CTRL) {
-                    if *y < 0.0 {
-                        self.end = self
-                            .end
-                            .checked_sub(
-                                MusicalTime::from_128th_beats(0, 1) * (y.abs() * 10.0) as u32,
-                            )
-                            .unwrap_or_default();
-                    } else if *y > 0.0 {
-                        self.end += MusicalTime::from_128th_beats(0, 1) * (y.abs() * 10.0) as u32;
-                    }
+    // fn event(&mut self, cx: &mut EventContext, event: &mut Event) {
+    //     event.map(|window_event, meta| match window_event {
+    //         WindowEvent::MouseScroll(x, y) => {
+    //             if cx.modifiers().contains(Modifiers::CTRL) {
+    //                 if *y < 0.0 {
+    //                     self.end = self
+    //                         .end
+    //                         .checked_sub(
+    //                             MusicalTime::from_128th_beats(0, 1) * (y.abs() * 10.0) as u32,
+    //                         )
+    //                         .unwrap_or_default();
+    //                 } else if *y > 0.0 {
+    //                     self.end += MusicalTime::from_128th_beats(0, 1) * (y.abs() * 10.0) as u32;
+    //                 }
 
-                    // Consume the event to stop the scrollview
-                    meta.consume();
-                } else {
-                    if *x > 0.0 {
-                        if let Some(new_start) = self.start.checked_sub(
-                            MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32,
-                        ) {
-                            self.start = new_start;
-                            self.end = self
-                                .end
-                                .checked_sub(
-                                    MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32,
-                                )
-                                .unwrap();
-                        }
-                    } else if *x < 0.0 {
-                        self.start += MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32;
-                        self.end += MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32;
-                    }
-                }
+    //                 // Consume the event to stop the scrollview
+    //                 meta.consume();
+    //             } else {
+    //                 if *x > 0.0 {
+    //                     if let Some(new_start) = self.start.checked_sub(
+    //                         MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32,
+    //                     ) {
+    //                         self.start = new_start;
+    //                         self.end = self
+    //                             .end
+    //                             .checked_sub(
+    //                                 MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32,
+    //                             )
+    //                             .unwrap();
+    //                     }
+    //                 } else if *x < 0.0 {
+    //                     self.start += MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32;
+    //                     self.end += MusicalTime::from_128th_beats(0, 1) * (x.abs() * 10.0) as u32;
+    //                 }
+    //             }
 
-                cx.needs_redraw();
-            }
+    //             cx.needs_redraw();
+    //         }
 
-            _ => {}
-        });
-    }
+    //         _ => {}
+    //     });
+    // }
 
-    fn draw(&self, cx: &mut DrawContext, canvas: &mut Canvas) {
+    fn draw(&self, cx: &mut DrawContext, canvas: &Canvas) {
         let bounds = cx.bounds();
         let scale = cx.scale_factor();
 
@@ -106,75 +101,115 @@ impl View for GridView {
         let gap = 0.0 * scale;
 
         let mut path1 = vg::Path::new();
-        path1.rect(bounds.x, bounds.y, bounds.w, height1);
+        path1.add_rect(
+            vg::Rect::from_point_and_size((bounds.x, bounds.y), (bounds.w, height1)),
+            None,
+        );
 
         let mut path2 = vg::Path::new();
-        path2.rect(bounds.x, bounds.y, bounds.w, height2);
+        path2.add_rect(
+            vg::Rect::from_point_and_size((bounds.x, bounds.y), (bounds.w, height2)),
+            None,
+        );
 
         // Draw horizontal lanes
         for i in 0..8 {
-            let color1 = vg::Color::rgb(20, 20, 20);
-            let color2 = vg::Color::rgb(25, 25, 25);
+            let color1 = Color::rgb(20, 20, 20);
+            let color2 = Color::rgb(25, 25, 25);
+
             canvas.save();
-            canvas.translate(
+            canvas.translate((
                 0.0,
                 i as f32 * (3.0 * white_key_height1 + 4.0 * white_key_height2),
-            );
-            canvas.fill_path(&mut path2, &vg::Paint::color(color2));
-            canvas.translate(0.0, height2);
-            canvas.fill_path(&mut path1, &vg::Paint::color(color1));
-            canvas.translate(0.0, height1);
-            canvas.fill_path(&mut path2, &vg::Paint::color(color2));
-            canvas.translate(0.0, height2);
-            canvas.fill_path(&mut path1, &vg::Paint::color(color1));
-            canvas.translate(0.0, height1);
-            canvas.fill_path(&mut path2, &vg::Paint::color(color2));
-            canvas.translate(0.0, height2);
-            canvas.fill_path(&mut path1, &vg::Paint::color(color1));
-            canvas.translate(0.0, height1);
-            canvas.fill_path(&mut path2, &vg::Paint::color(color2));
-            canvas.translate(0.0, height2);
-            canvas.fill_path(&mut path1, &vg::Paint::color(color2));
-            canvas.translate(0.0, height1);
-            canvas.fill_path(&mut path1, &vg::Paint::color(color1));
-            canvas.translate(0.0, height1);
-            canvas.fill_path(&mut path1, &vg::Paint::color(color2));
-            canvas.translate(0.0, height1);
-            canvas.fill_path(&mut path1, &vg::Paint::color(color1));
-            canvas.translate(0.0, height1);
-            canvas.fill_path(&mut path1, &vg::Paint::color(color2));
-            canvas.translate(0.0, height1);
+            ));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color2);
+            canvas.draw_path(&path2, &paint);
+            canvas.translate((0.0, height2));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color1);
+            canvas.draw_path(&path1, &paint);
+            canvas.translate((0.0, height1));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color2);
+            canvas.draw_path(&path2, &paint);
+            canvas.translate((0.0, height2));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color1);
+            canvas.draw_path(&path1, &paint);
+            canvas.translate((0.0, height1));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color2);
+            canvas.draw_path(&path2, &paint);
+            canvas.translate((0.0, height2));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color1);
+            canvas.draw_path(&path1, &paint);
+            canvas.translate((0.0, height1));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color2);
+            canvas.draw_path(&path2, &paint);
+            canvas.translate((0.0, height2));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color2);
+            canvas.draw_path(&path1, &paint);
+            canvas.translate((0.0, height1));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color1);
+            canvas.draw_path(&path1, &paint);
+            canvas.translate((0.0, height1));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color2);
+            canvas.draw_path(&path1, &paint);
+            canvas.translate((0.0, height1));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color1);
+            canvas.draw_path(&path1, &paint);
+            canvas.translate((0.0, height1));
+            let mut paint = vg::Paint::default();
+            paint.set_color(color2);
+            canvas.draw_path(&path1, &paint);
+            canvas.translate((0.0, height1));
             let mut line_path = vg::Path::new();
-            line_path.move_to(bounds.x, bounds.y);
-            line_path.line_to(bounds.x + bounds.w, bounds.y);
-            let mut line_paint = vg::Paint::color(vg::Color::rgb(65, 65, 65));
-            line_paint.set_line_width(2.0);
-            canvas.stroke_path(&mut line_path, &line_paint);
+            line_path.move_to((bounds.x, bounds.y));
+            line_path.line_to((bounds.x + bounds.w, bounds.y));
+            let mut line_paint = vg::Paint::default();
+            line_paint.set_color(Color::rgb(65, 65, 65));
+            line_paint.set_stroke_width(2.0);
+            line_paint.set_style(vg::PaintStyle::Stroke);
+            canvas.draw_path(&mut line_path, &line_paint);
 
             canvas.restore();
         }
 
         // Draw vertical lines
-        let start = self.start.as_beats_f64();
-        let end = self.end.as_beats_f64();
-        let duration = self.end.checked_sub(self.start).unwrap();
-        let num = duration.as_beats_f64() as f32;
+        let start = PianoRollData::view_start.get(cx);
+        let end = PianoRollData::view_end.get(cx);
+        let grid_spacing = PianoRollData::grid.get(cx);
+        let duration = end.checked_sub(start).unwrap();
+        let duration = duration.as_beats_f64();
+        let num = (duration / grid_spacing.to_musical_time().as_beats_f64()).round() as u32;
 
-        let px_per_beat = (bounds.w - (60.0 * scale)) / (num * scale);
+        let px_per_beat = (bounds.w - (70.0 * scale)) / (duration as f32 * scale);
 
         // let px_per_beat = 100.0;
-        let mut lane_x =
-            cx.logical_to_physical(60.0 - self.start.as_beats_f64().fract() as f32 * px_per_beat);
 
-        for index in 0..num as u32 + 1 {
-            let mut path = vg::Path::new();
-            path.move_to(bounds.x + lane_x, bounds.y);
-            path.line_to(bounds.x + lane_x, bounds.bottom());
-            canvas.stroke_path(
-                &mut path,
-                &vg::Paint::color(vizia::vg::Color::rgb(255, 10, 10)),
+        // let px_per_beat = 100.0;
+
+        for index in 0..num + 1 {
+            let lane_x = cx.logical_to_physical(
+                70.0 + grid_spacing.to_musical_time().as_beats_f64() as f32
+                    * px_per_beat
+                    * index as f32,
             );
-            lane_x += cx.logical_to_physical(px_per_beat);
+            let mut path = vg::Path::new();
+            path.move_to((bounds.x + lane_x, bounds.y));
+            path.line_to((bounds.x + lane_x, bounds.bottom()));
+            let mut paint = vg::Paint::default();
+            paint.set_color(Color::rgb(255, 10, 10));
+            paint.set_style(vg::PaintStyle::Stroke);
+            canvas.draw_path(&path, &paint);
+            // lane_x += cx.logical_to_physical(px_per_beat);
         }
     }
 }
